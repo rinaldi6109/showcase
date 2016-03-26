@@ -191,7 +191,7 @@ jQuery(document).ready(function() {
 		},
 	});
     
-	
+	alert("1!");
 	var sm=[],k=0;
 	var box=document.getElementById("legendx1");
 	for (var i=0;i<2;i++) {
