@@ -1,0 +1,6 @@
+#for-chart td, #for-chart th {text-align:right;padding:5px 5px 5px 1px;} 
+#for-chart tr:not(.tot) td.tot, #for-chart td.tot2 {border-left:1px solid #DDDDDD;} 
+#for-chart tr.tot td.tot {border-top-width:2px;}
+#for-chart tr td {border-bottom:1px solid #DDDDDD;}
+#for-chart th {letter-spacing: 0px !important;width:7% !important}
+html {font-family:Calibri,Verdana,Sans Serif;}
