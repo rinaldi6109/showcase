@@ -308,7 +308,7 @@ jQuery(document).ready(function() {
 			}			
 			sm[k++] = new Highcharts.Chart({
 				chart:{renderTo:'hcy'+i},
-				xAxis: {title:{text:axisx[i]}},
+				xAxis: {title:{text:axisx[i]+"!"}},
 				series:[
 				{type: 'scatter',data:mnaz,color:'rgba(0,0,0,0.25)',marker:{fillColor:'rgba(255,255,255,0)',lineWidth: 1,lineColor: null}},
 				{type: 'scatter',data:perc,color:'#ff0000'}
