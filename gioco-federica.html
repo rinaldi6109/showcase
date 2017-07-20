@@ -1,0 +1,301 @@
+<html lang="it-IT">
+	<head><meta charset="UTF-8"></head>
+	<style>#canvas {border:1px solid red;}</style>
+	<body>
+	</body>
+	<script>
+		var x = 0;
+		var y = 0;
+		var width = 1000;
+		var height = 800;
+		
+		var canvas = document.createElement('canvas'); //Create a canvas element
+		canvas.style.border="1px solid red;";
+		canvas.id="canvas";
+		//Set canvas width/height
+		canvas.style.width='100%';
+		canvas.style.height='100%';
+		//Set canvas drawing area width/height
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		//Position canvas
+		canvas.style.position='absolute';
+		canvas.style.left=0;
+		canvas.style.top=0;
+		canvas.style.zIndex=100000;
+		//canvas.style.pointerEvents='none'; //Make sure you can click 'through' the canvas
+		document.body.appendChild(canvas); //Append canvas to body element
+		var c = canvas.getContext('2d');
+		
+		function Ball(x, y, r, dx, dy, red, green, blue) {
+			this.x = x;
+			this.y = y;
+			this.r = r;
+			this.dx = dx;
+			this.dy = dy;
+			this.red=red;
+			this.green=green;
+			this.blue=blue;
+			
+			this.update = function() {
+				this.x = this.x + this.dx;
+				this.y = this.y + this.dy;
+				// Bounce off the edges
+				if (this.y<=0+r || this.y>=h-r) this.dy=-this.dy;
+				if (this.x<=0+r || this.x>=w-r) this.dx=-this.dx;
+				if (this.dx==0 && this.dy==0) this.r=(this.r>1000) ? 1000 : this.r+80/1000*timeStep/2.5;
+				//	console.log(this.y,this.dy);
+				this.stroke();
+			};
+			
+			this.stroke = function() {
+				c.beginPath();
+				
+				c.arc(this.x, this.y, raggio(this.r),
+				0, Math.PI * 2);
+				c.lineWidth=0;
+				//parseInt(Math.random()*256)
+				c.fillStyle="rgba("+this.red+","+this.green+","+this.blue+",0.7)";
+				c.fill();
+				//    c.stroke();
+			};
+		}
+		
+		function raggio(ra) {
+			//	var ra;
+			if (ra>80) {
+				if (ra>=160) {
+					ra=80-(ra-160)*3;
+					if (ra<0) ra=0;
+					return ra;
+				}
+				else {
+					ra=80;
+				}
+			}
+			return ra;
+			
+		}
+		
+		var timeStep = 25; // In milliseconds
+		var w = c.canvas.width;
+		var h = c.canvas.height;
+		var cmTID;
+		
+		function updateAll() {
+			c.clearRect(0, 0, w, h);
+			
+			if (hit>=goal) {
+				
+				c.fillStyle = 'rgba(' + Math.round(255 - dr * f) + ','
+				+ Math.round(255 - dg * f) + ','
+				+ Math.round(255 - db * f) + ',0.5)';
+				
+				c.fillRect(0, 0, w, h);
+				if  (f>=50) f=50 
+				else f++;
+			}
+			
+			for (var i = 0; i < balls.length; i = i + 1) {
+				balls[i].update();
+			}
+			// ************* controllo collisione **********************
+			for (var i = 0; i < balls.length; i = i + 1) {
+				if (balls[i].dx==0 && balls[i].dy==0 && raggio(balls[i].r)>0) {
+					//					console.log("esplosa "+i);
+					for (var j = 0; j < balls.length; j = j + 1) {
+						if (i!=j && (balls[j].dx!=0 || balls[j].dy!=0)) {
+							if (Math.sqrt(Math.pow(balls[i].x-balls[j].x, 2) + Math.pow(balls[i].y-balls[j].y, 2))<=  raggio(balls[i].r)+raggio(balls[j].r) ) {
+								balls[j].dx=0;
+								balls[j].dy=0;
+								hit=hit+1;
+								
+							}
+						}
+					}
+				}  
+			}
+			c.font = "40px Futura XBlk BT";
+			c.textAlign = "right";
+			c.strokeStyle = "#000000";
+			c.lineWidth = 1;
+			c.strokeText("HIT:",w-100,50); 
+			c.strokeText("GOAL:",w-100,100); 
+			c.strokeText("OVER:",w-100,150); 
+			c.textAlign = "left";
+			c.strokeText(hit,w-95,50); 
+			c.strokeText(goal,w-95,100); 
+			c.strokeText(np,w-95,150); 
+			
+			var fineLivello=false;
+			if (sparo) {
+				var fineLivello=true;
+				for (var i = 0; i < balls.length; i = i + 1) {
+					if (balls[i].dx==0 && balls[i].dy==0) {
+						if 	(raggio(balls[i].r)>0) {
+							fineLivello=false;
+							break;
+						}
+					}
+				}
+			}
+			
+			if (fineLivello) {
+			if (hit>=goal) l=l+1;
+				if (l<livelli.length) button();
+			}
+			else {
+				clearTimeout(cmTID);
+				cmTID = setTimeout(updateAll, timeStep);
+			}
+		}
+		
+		function button() {
+			
+			c.clearRect(0, 0, w, h);
+			
+			c.font = "20px Futura XBlk BT";
+			c.strokeStyle = "#dddddd";
+			c.lineWidth = 3;
+			c.fillStyle = "#f0f0f0";
+			
+			c.fillRect(rect.x,rect.y,rect.w,rect.h);
+			
+			c.strokeRect(rect.x,rect.y,rect.w,rect.h);
+			
+			c.fillStyle = "#000";
+			c.textAlign = "center";
+			
+			c.fillText("LEVEL "+(l+1), w/2, h/2-50+25);
+			c.fillText("Click here to begin", w/2, h/2-50+50);
+			
+			canvas.onclick=avviaLivello;
+			
+		}
+		
+		var livelli=[
+		{goal:2, np: 7},
+		{goal:3, np: 10},
+		{goal:15, np: 30},
+		{goal:30, np: 50},
+		{goal:50, np: 75},
+		{goal:80, np: 90},
+		{goal:95, np: 100},
+		];
+		
+		var l=0;
+		
+		var steps = 50,
+		dr = (255 - 123) / steps,
+		dg = (255 - 213) / steps,
+		db = (255 - 50) / steps;
+		
+		setBB();   
+		
+			var rect={x:w/2-150,y:h/2-50,w:300,h:100};
+			var np, goal, balls, r, hit;
+		var sparo;
+		button();		
+		
+		function avviaLivello(e){
+			e.preventDefault();
+			e.stopPropagation();
+			var mx=e.clientX-BBoffsetX;
+			var my=e.clientY-BBoffsetY;
+			if(mx>=rect.x && mx<=rect.x+rect.w && my>=rect.y && my<=rect.y+rect.h){
+				//    alert("clicked in rect");
+				sparo=false;
+				
+				// Create the balls
+				hit=0;
+				np = livelli[l].np;
+				goal=livelli[l].goal;
+				balls = [];
+				r = 8;
+				var vel=2.5;
+				
+				for (var i = 0; i < np; i = i + 1) {
+					var x = Math.random() * (w - r * 2) + r;
+					var y = Math.random() * (h - r * 2) + r; 
+					var dx = (Math.random() * 2 - 1)*vel;
+					var dy = (Math.random() * 2 - 1)*vel;
+					var red=15+parseInt(Math.random()*225);
+					var green=15+parseInt(Math.random()*225);
+					var blue=15+parseInt(Math.random()*225);
+					
+					balls.push(new Ball(x, y, r, dx, dy, red, green, blue));
+				}
+				
+				f = 0;
+				
+				updateAll();
+				canvas.onclick=riceviSparo;
+			}
+		}
+		
+		function setBB(){
+			BB=canvas.getBoundingClientRect();
+			BBoffsetX=BB.left;
+			BBoffsetY=BB.top;
+		}
+		
+		function riceviSparo(ev) {
+			var x=ev.clientX;
+			var y=ev.clientY;
+			balls.push(new Ball(x, y, 1, 0, 0, 100, 50, 80));
+			//  console.log(x,y);
+			//  console.log(balls.length);
+			sparo=true;
+			canvas.onclick=null;
+		};
+		
+		window.aonload = function() {
+			
+			var audio = new (window.AudioContext || window.webkitAudioContext)();
+			
+			//    var audio = new window.webkitAudioContext(),
+			var       position = 0,
+			scale = {
+				g: 392,
+				f: 349.23,
+				e: 329.63,
+				b: 493.88
+			},
+			song = "gfefgg-fff-gbb-gfefggggffgfe---";
+			
+			//			var music=  setInterval(play, 500 / 4);
+			
+			function createOscillator(freq) {
+				var osc = audio.createOscillator();
+				var gainNode = audio.createGain();
+				osc.connect(gainNode);
+				gainNode.connect(audio.destination);
+				gainNode.gain.value = 0.002;
+				osc.frequency.value = freq;
+				osc.type = "square";
+				
+				//        osc.connect(audio.destination);
+				osc.start(0);
+				
+				setTimeout(function() {
+					osc.stop(0);
+					//            osc.disconnect(audio.destination);
+				}, 500 / 4)
+			}
+			
+			function play() {
+				console.log("play");
+				var note = song.charAt(position),
+				freq = scale[note];
+				position += 1;
+				if(position >= song.length) {
+					position = 0;
+					clearInterval(music);
+				}
+				if(freq) {
+					createOscillator(freq);
+				}
+			}
+		};
+	</script>	
+</html>
